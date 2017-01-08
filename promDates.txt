@@ -1,0 +1,106 @@
+%Prom Dates:
+%Guy ‘A’ and his date (A couple), Guy ‘B’ and his date (B couple), Guy ‘C’ and his date (C couple) and guy ‘D’ and his date (D couple) are seated around a circular %table on a prom night.   Guy ‘A’s’ date was appreciated by Guy ‘B’, that sat next to the left hand side of her.  Guy ‘B’ was appreciated by Guy C’s date, who sat %diagonally opposite to him. Guy C’s date was appreciated by the host’s date, in between the host couple with D to her right and D's date to her left..  Print the spot of each person if the 'D' couple is the host for that night
+
+%Way to Execute : in the command prompt type "clingo 0 prom_dates_solution1.txt" to get all possible solutions.  Using the command line "clingo prom_dates_solution1.txt" would give one possible satisfiable solution.  There are 48 possible solutions depending on total number of combinations.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Objects
+guy(a;b;c;d).
+person(a; adate; b; bdate; c; cdate; d; ddate).
+spot(0..7).
+
+%statics
+pair(a, adate).
+pair(b, bdate).
+pair(c, cdate).
+pair(d, ddate).
+
+
+%Dating is mutual relationship, i.e., symmetric
+
+pair(P, P1) :- pair(P1, P), person(P) , person(P1).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%They were seated around a circular table with each person having a separate place
+1{place(P,S): spot(S)}1:-person(P).
+
+%the person that is appreciated by one other person
+1{appreciation(P,P1) : person(P1)}1 :- person(P).
+
+
+% Define : two places at a table are opposite
+opposite(S,S+4) :- spot(S), spot(S+4).
+
+% opposite is symmetric
+opposite(S1,S2) :- opposite(S2,S1), spot(S1), spot(S2).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% two people cannot occupy the same spot
+:-place(P1,S), place(P2,S), P1!=P2, spot(S), person(P1), person(P2).
+
+% Guy A's Date was appreciated by Guy B, who sat next to her on her left.
+% Guy B sat next to Guy A's date on her left
+%:- place(Adate,S), not place(B,S+1), spot(S).
+
+place(b, S-1) :- place(adate, S), spot(S), spot(S-1).
+place(b, 7) :- place(adate, 0).
+
+place(adate, S+1) :- place(b, S), spot(S), spot(S+1).
+
+place(adate, 0) :- place(b, 7).
+
+% guy B was appreciated by guy C's date who sat diagonally opposite to him across the center of the table.
+
+place(b,S1) :- place(cdate,S2), opposite(S1,S2), spot(S1), spot(S2).
+place(cdate,S2) :- place(b, S1), opposite(S1,S2), spot(S1), spot(S2).
+
+%Guy C’s date was appreciated by the host’s date, who sat in between the host couple with D to her right and D's date to her left.
+
+place(cdate, S-1) :- place(d, S), spot(S), spot(S-1).
+place(cdate, S+1) :- place(ddate, S), spot(S), spot(S+1).
+
+place(d, S) :- place(cdate, S-1), spot(S), spot(S-1).
+place(ddate, S) :- place(cdate, S+1), spot(S), spot(S+1).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Appreciation : I did not feel the necessity to mention the spots here as the constraints on occupying the seats have already been take care of
+:- appreciation(adate, b), not appreciation(adate,c), not appreciation(adate,d),not appreciation(adate,a), not appreciation(adate,bdate),not appreciation(adate,cdate), not appreciation(adate,ddate).
+
+appreciation(b, S-1) :- appreciation(adate, S), spot(S), spot(S-1).
+appreciation(b, 7) :- appreciation(adate, 0).
+
+appreciation(adate, S+1) :- appreciation(b, S), spot(S), spot(S+1).
+
+appreciation(adate, 0) :- appreciation(b, 7).
+
+
+:- appreciation(b, cdate), not appreciation(b,adate), not appreciation(b,bdate),not appreciation(b,ddate), not appreciation (b,a),not appreciation(b,c), not appreciation(b,d).
+
+appreciation(b,S1) :- appreciation(cdate,S2), opposite(S1,S2), spot(S1), spot(S2).
+appreciation(cdate,S2) :- appreciation(b, S1), opposite(S1,S2), spot(S1), spot(S2).
+
+
+
+appreciation(b,S1) :- appreciation(cdate,S2), opposite(S1,S2), spot(S1), spot(S2).
+appreciation(cdate,S2) :- appreciation(b, S1), opposite(S1,S2), spot(S1), spot(S2). 
+
+
+appreciation(cdate, S-1) :- appreciation(d, S), spot(S), spot(S-1).
+appreciation(cdate, S+1) :- appreciation(ddate, S), spot(S), spot(S+1).
+
+appreciation(d, S) :- appreciation(cdate, S-1), spot(S), spot(S-1).
+appreciation(ddate, S) :- appreciation(cdate, S+1), spot(S), spot(S+1).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+#show place/2.
+#show appreciation/2.
